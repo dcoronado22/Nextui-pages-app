@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -29,6 +29,7 @@ import { capitalize } from "./utils";
 import { DeleteIcon } from "./DeleteIcon";
 import { EditIcon } from "./EditIcon";
 import { EyeIcon } from "./EyeIcon";
+import { useRouter } from "next/router";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
   active: "success",
@@ -40,11 +41,12 @@ const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"];
 
 type User = (typeof users)[0];
 
-export default function App() {
+export default function App(data: any) {
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(
     new Set([])
   );
+
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
@@ -54,6 +56,32 @@ export default function App() {
     column: "age",
     direction: "ascending",
   });
+
+  const router = useRouter();
+
+  const redirectClick = (item: any) => {
+    router.push({
+      pathname: `/FormPage/${item.id}`,
+    });
+  };
+
+  const deleteClick = (item: any) => {
+    let usersD = JSON.parse(localStorage.getItem("data") || "");
+    console.log(item.id);
+    let newUsers = usersD.filter((o: User) => {
+      return o.id !== item.id;
+    });
+    console.log(newUsers);
+    saveLocalStorage(newUsers);
+  };
+
+  const [, setState] = React.useState(false);
+
+  const saveLocalStorage = (data: any) => {
+    localStorage.setItem("data", JSON.stringify(data));
+    () => setState((prev) => !prev);
+    router.push("/GridPage");
+  };
 
   const [page, setPage] = React.useState(1);
 
@@ -66,9 +94,8 @@ export default function App() {
       Array.from(visibleColumns).includes(column.uid)
     );
   }, [visibleColumns]);
-
   const filteredItems = React.useMemo(() => {
-    let filteredUsers = [...users];
+    let filteredUsers = Array.isArray(data.data) ? [...data.data] : [];
 
     if (hasSearchFilter) {
       filteredUsers = filteredUsers.filter((user) =>
@@ -85,7 +112,11 @@ export default function App() {
     }
 
     return filteredUsers;
-  }, [users, filterValue, statusFilter]);
+  }, [data, filterValue, statusFilter]);
+
+  const handleDelete = (user: any) => {
+    console.log(user.id); // Llama a la función onDelete con el ID del usuario
+  };
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -150,12 +181,20 @@ export default function App() {
             </Tooltip>
             <Tooltip content="Edit user">
               <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <EditIcon />
+                <EditIcon
+                  onClick={() => {
+                    redirectClick(user);
+                  }}
+                />
               </span>
             </Tooltip>
             <Tooltip color="danger" content="Delete user">
               <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                <DeleteIcon />
+                <DeleteIcon
+                  onClick={() => {
+                    deleteClick(user);
+                  }}
+                />
               </span>
             </Tooltip>
           </div>

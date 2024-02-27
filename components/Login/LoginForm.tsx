@@ -8,7 +8,7 @@ import {
   Input,
   Link,
 } from "@nextui-org/react";
-import { EyeSlashFilledIcon } from "@/icons/EyeSlashFilledIcon";
+import { EyeSlashFilledIcon } from "@/icons/eyeSlashFilledIcon";
 import { EyeFilledIcon } from "@/icons/eyeFiledIcon";
 import { GoogleIcon } from "@/icons/google";
 import { MicrosoftIcon } from "@/icons/microsoft";
